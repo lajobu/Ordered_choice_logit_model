@@ -1,0 +1,851 @@
+---
+title: 'Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe'
+author: 'Jorge Bueno Perez & Lashari Gochiashvili'
+output:
+  html_document:
+    highlight: tango
+    lib_dir: libs
+    self_contained: yes
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r echo = T, results = 'hide', message= FALSE}
+library(dplyr)
+library(knitr)
+library(psych)
+library(MASS)
+library(lmtest)
+library(oglmx)
+library(generalhoslem)
+library(jtools)
+library(brant)
+library(DescTools)
+library(pscl)
+library(stargazer)
+```
+
+```{r echo = T, results = 'hide', message= FALSE}
+rstudioapi::getActiveDocumentContext()$path %>% 
+  dirname
+```
+
+```{r echo = F, results = 'hide', message= FALSE, warning=FALSE}
+setwd(rstudioapi::getActiveDocumentContext()$path %>% 
+  dirname) # relative path added
+survey <- read.csv("survey_results_public.csv")
+source("ome.R")
+```
+
+# 1) Abstract:
+
+This paper uses ordered choices logit model to build a model for career satisfaction of programmers in Eastern European countries. The data is based on the online survey results collected by  `StackOverlFlow.com`^[Online community for developers worldwide https://stackoverflow.com/questions ]. The latter is one of the most popular online communities for programmers in the world. In this paper, we explained dependent variable career satisfaction with different independent variables that was selected using ordered choices logit model and verified by statistical tests. To build the econometric model, we used available packages in R such as `MASS`, `lmtest` and `oglmx`.
+The end result is a final model with significant variables that best explains the career satisfaction of programmers in Eastern Europe. 
+
+
+**Keywords:** career satisfaction, ordered choices logit model, ordered logit model, polr, ologit.reg, lmtest, anova
+
+
+# 2) Introduction:
+
+
+> “The only way to do great work is to love what you do. If you haven't found it yet, keep looking. Don't settle.” 
+>
+> --- Steve Jobs
+
+  Today, it is very important for the organizations to stay competitive on the market. To sustain competitive advantage, organizations need to attract and keep highly talented people. Many companies are trying to be number one choice for the employees on the market. In general, career satisfaction is very much connected to life satisfaction (Joo and Park 2009)^[Joo, B. and Park, S. (2009), “Career satisfaction, organizational commitment, and turnover intention”, Leadership & Organizational Development Journal, Vol. 21 No. 6, pp. 482-486.]. 
+  
+  Growing demand on IT professionals has increased salaries. Companies are trying to study psychological aspects of employees to design strategies how to keep highly talented people in the company and assure their career satisfaction. Career satisfaction leads employees to high job performance. On the other hand, companies are trying to achieve lower levels of turnover (Irvine and Evans,1995)^[Irvine, D., & Evans, M. “Job satisfaction and turnover among nurses; integrating research findings across studies,” Nursing Research 44 (4), 1995, pp. 246-53.]. 
+  
+  In our study we used data collected by `Stack Overflow` during the annual survey in 2018 designed for programmers. `Stack Overflow` is a community forum for programmers. In this forum the users are able to ask questions about their programs, and one is able to reply to them sharing his knowledge.
+ 
+  We will verify the following hypothesis using ordered choices logit model:
+
+  **Hypothesis 1:** Higher salary increases career satisfaction
+In our study we will examine the relationship between salary and career satisfaction. During the career, a person changes the job from one company to another when there is a better offer. Biggest part of the offer is salary levels. When a person is satisfied with the salary, stays in the company longer and claims that she has a higher level of career satisfaction. 
+
+  **Hypothesis 2:** Having hobby increases career satisfaction
+We will describe the relationship between having hobby and career satisfaction. We think the people with hobbies are more satisfied with their career and find time to express themselves by having hobbies. Also, people who do not have hobbies are more concerned first to reach career satisfaction and then take some time for hobbies. 
+
+
+# 3) Literature review:
+
+  There are many researches conducted to study career satisfaction and the variables that are influencing it. Factors that affect career satisfaction vary, such as education (Andres and Henry 1963)^[Andrews, I.R., and Henry, M.M. “Management Attitudes Toward Pay,” Industrial Relations, (3), 1963, pp. 29-39], age (Lawler and Porter 1966)^[Lawler E.E., and Porter L.W., “Predicting Managers’ Pay and Their Satisfaction With Their Pay”, Personnel Psychology], pay and gender (Mason 1997)^[Mason, E.S. “A Case Study of Gender Differences in Job Satisfaction Subsequent To Implementation of An Insurance
+Firm in Canada, “British Journal of Management (8:2), 1997, pp.163-173.].
+
+  At a personal, level career satisfaction is defined if a person has meaningful accomplishments in career (Judge et al., 1995)^[Judge, T.A., Cable, D.M., Boudreau, J.W. and Bretz, R.D. (1995), “An empirical investigation of the predictors of executive career success”, Personnel Psychology, Vol. 48 No. 3, pp. 485-519.]. Goal orientation is also one of the influential factor in performance and career satisfaction (Kozlowski et al., 2001)^[Kozlowski, S.W.J., Gully, S.M., Brown, K.G., Salas, E., Smith, E.M. and Nason, E.R. (2001), “Effects of training goals and goal orientation traits on multidimensional training outcomes and performance adaptability”, Organizational Behavior and Human Decision Processes, Vol. 85 No. 1, pp. 1-31.]. Career satisfaction is related to job satisfaction. There are many jobs that a person can take during their career. The current job satisfaction is very much related to general career satisfaction. Individuals who have higher level of job satisfaction have better job performance, they are less likely to leave the company and they are committed more to the company than those who have low level of job satisfaction (Fried and Ferris 1987)^[Fried, Y., and Ferris, G.R. The validity of the job characteristics model. Personnel Psychology, 40, 2 (1987), 287-322]. On the other hand, the problem about employee turnover is always actual and requires well established HR strategies by the companies (Joo and McLean 2006)^[Joo, B. and McLean, G.N. (2006), “Best employer studies: a conceptual model from a literature review and a case study”, Human Resource Development Review, Vol. 5 No. 2, pp. 228-57.]. 
+
+  Interesting conclusions are derived from the study conducted by Nan Hu and the team^[Hu, Nan; Poon, Simon; Zhong, Jiangfan; and Wan, Yun, "Job Satisfaction of Information Technology Professionals" (2004). AMCIS 2004 pp. 3616-3623. http://aisel.aisnet.org/amcis2004/456]. The is an empirical investigation on how different factors affect job satisfaction for information technology professionals. IT professionals are more likely to be satisfied with their job when the job opportunity is aligned with their career expectations (Hu et al., 2004)^[Hu, Nan; Poon, Simon; Zhong, Jiangfan; and Wan, Yun, "Job Satisfaction of Information Technology Professionals" (2004). AMCIS 2004 pp. 3616-3623. http://aisel.aisnet.org/amcis2004/456]. In our study we will also examine the relationship between career satisfaction and programmers current job satisfaction. Also, IT professionals are more likely to be happy with their job when they have decision power and are given chances to influence with recommendations. However, we will not include these factors in our model as we lack information about these factors. It is worth mentioning that there are some job duties that are demotivating IT professionals (Hu et al., 2004)^[Hu, Nan; Poon, Simon; Zhong, Jiangfan; and Wan, Yun, "Job Satisfaction of Information Technology Professionals" (2004). AMCIS 2004 pp. 3616-3623. http://aisel.aisnet.org/amcis2004/456]. 
+
+LeDuc broadly overviews "motivation of progammers" in his paper. He groups motivation into two groups `internal` and `external` motivation. `Internal` motivation has to do with person's needs and satisfiers. The `external` motivation is mostly related to work environmet (LeDuc 1980)^[A. L. LeDuc Jr, 1980, Motivation of Programmers, ACM SIGMIS Database, 11 (4):4-12 https://dl.acm.org/doi/pdf/10.1145/1113469.1113470 ]. In their studies, Couger and Zawacki reviewed programmers motivation in different dimensions. In particular, they discussed importance of variety of skills in relation with job satisfaction. What is the role of tasks significance and autonomy in responsibilities and how they related to programmers satisfaction. Study incorporates many psychological aspects and analyzes Maslow's hierarchy of need connected to the motivation and satisfaction of programmers at their jobs (Couger and Zawacki 1978)^[Couger, D.J., and Zawacki R.A., 1978,  What Motivates DP Professionals?" Datamation, 24, 9 (September 1978), pp. 116ff.].
+
+
+# 4) Data description:
+
+`Stack Overflow` is a community forum for programmers. In this forum the users are able to ask questions about their programs, and one is able to reply to them sharing his knowledge.
+ 
+Being one of the `most known community forums of programmers around the world`, it is a good place to develop a survey in order to know more information about programmers. Every year Stack Overflow develops a `voluntary survey`; however, the main data object of this paper is the survey developed in `January 2018`, which is available in the `website Kaggle`. The survey was answered by almost `98 thousand respondents` and `129 different questions`, rows and columns respectively of the dataset.
+
+```{r echo= FALSE, results='asis'}
+paste("The dataset survey initialy has", dim(survey)[1], "rows and",  dim(survey)[2], "columns") %>% 
+  knitr::knit_print()
+```
+
+* More details about `Stack Overflow`: https://stackoverflow.com/company
+* Next it can be found the link to the data in `kaggle`: https://www.kaggle.com/stackoverflow/stack-overflow-2018-developer-survey
+
+## 4.1) Data preparation:
+
+During the process of cleaning the data several strategies were applied.
+ 
+First of all, we `selected several columns`, based on our `intuition`, trying to answer the following question `“Which questions of the survey can explain the best the career satisfaction of the programmers?”.`
+
+`Eight survey questions were selected`, together with the dependent variable of our model – `CareerSatisfaction`. More details about the questions can be found below, linked to the columns of our data:
+
+* `CareerSatisfaction` – Overall, how satisfied are you with your career thus far?
+* `Country` - In which country do you currently reside?
+* `FormalEducation` - Which of the following best describes the highest level of formal education that you have completed?
+* `CompanySize` - Approximately how many people are employed by the company or organization you work for?
+* `YearsCoding` - For how many years have you coded professionally (as a part of your work)?
+* `JobSatisfaction` – How satisfied are you with your current job? If you work more than one job, please answer regarding the one you spend the most hours on.
+* `ConvertedSalary` – What is your current gross salary (before taxes and deductions)? Please enter a whole number in the box below, without any punctuation. If you are paid hourly, please estimate an equivalent weekly, monthly, or yearly salary. If you prefer not to answer, please leave the box empty. *NOTE: (There was an option to select the currency. After, the salary was converted to annual USD salaries using the exchange rate on 2018-01-18, assuming 12 working months and 50 working weeks)
+* `Hobby` - Do you code as a hobby?
+* `Age` - What is your age? If you prefer not to answer, you may leave this question blank.
+
+```{r echo= TRUE, results='asis'}
+survey <- survey %>%
+  dplyr::select(CareerSatisfaction, Country, FormalEducation, 
+                CompanySize, YearsCoding, JobSatisfaction, 
+                ConvertedSalary, Hobby, Age)
+```
+
+In some questions the respondents had the option to not reply, having the option to leave in blank some of them. For this reason, we `excluded the missing value and nulls`, consequently we assume that `programmers are people who are employed and receive salary`. This assumption was motivated by the empty values in the columns `ConvertedSalary` and `CompanySize`. Apart from that, we considered `only programmers that gave their Age`.
+
+```{r echo= TRUE, results='hide'}
+survey <- survey %>% 
+  filter(ConvertedSalary!=0) %>% 
+  na.omit(survey)
+```
+
+We will check if there is any `NA` or `zero` values:
+
+```{r echo= TRUE, results='asis'}
+any(is.na(survey))
+any(survey$ConvertedSalary <= 0) %>% 
+  knitr::knit_print()
+```
+
+Both of the results were `FALSE`, hence we can continue farther.
+
+The next step was to select `ten Eastern countries` to study: `Poland`, `Czech Republic`, `Hungary`, `Slovakia`, `Romania`, `Bulgaria`, `Turkey`, `Moldova`, `Belarus` and `Ukraine`.
+
+```{r echo= TRUE, results='hide'}
+survey <- survey %>%
+  filter(
+    Country %in% c("Poland", "Czech Republic", "Hungary", "Slovakia", "Romania",
+      "Bulgaria", "Turkey", "Moldova", "Belarus", "Ukraine")) 
+```
+
+Subsequently, each variable selected was analyzed separately, in order to find some `outliers` in case of `numeric` variables and to `encode the data` in case of `ordinal` features:
+
+* `CareerSatisfaction`: This `characteristic` feature is the `dependent variable`, and has `seven levels` which `can be ordered in a logical way`, from extremely dissatisfied to Extremely satisfied. For the purpoese of this analysis it will be transformed to `three levels`, because it is difficult to define the difference between `extremly disatisfied`, `moderately disatisfied` and `slighty disatisfied`, the same for `satisfied`.
+
+Below more details about the encoding can be found:
+
++ `Disatisfied`: "Extremely dissatisfied", "Moderately dissatisfied" and "Slightly dissatisfied", encoded to 1
++ `Neutral`: "Neither satisfied nor dissatisfied", encoded to 2
++ `Satisfied`: "Slightly satisfied", "Moderately satisfied" and "Extremely satisfied", encoded to 3
+
+```{r echo= FALSE, results='asis'}
+unique(survey$CareerSatisfaction) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$CareerSatisfaction <-
+  plyr::revalue(
+    survey$CareerSatisfaction,
+    c("Extremely dissatisfied" = 1,
+      "Moderately dissatisfied" = 1,
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Moderately satisfied" = 3,
+      "Extremely satisfied" = 3)) %>% as.factor()
+```
+
+* `Country`: This `characteristic` feature was previously described. However, after removing missing values there is one country less (Moldova), hence we will have `nine countries`. It `cannot be ordered in a logical way`, hence it will be encoded, but it will be transformed to `factor`.
+
+```{r echo= FALSE, results='asis'}
+unique(survey$Country) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$Country <- survey$Country %>%
+  as.factor()
+```
+
+* `FormalEducation` - This `characteristic` feature has `nine levels` that `can be ordered in a logical way`, from "I never completed any formal education", to "Other doctoral degree (Ph.D, Ed.D., etc.)". 
+
+Because this feature can be `ordered in a logical way`, it will be grouped in three categories:
+
++ `Low level of education`: "I never completed any formal education", "Primary/elementary school" and "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)", encoded to 1
++ `Medium level of education`: "Professional degree (JD, MD, etc.)", "Some college/university study without earning a degree" and "Associate degree", encoded to 2
++ `High level of education`: "Bachelor’s degree (BA, BS, B.Eng., etc.)", "Master’s degree (MA, MS, M.Eng., MBA, etc.)" and "Other doctoral degree (Ph.D, Ed.D., etc.)", encoded to 3
+
+Below more details about the encoding can be found:
+
+```{r echo= FALSE, results='asis'}
+unique(survey$FormalEducation) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$FormalEducation <- plyr::revalue(
+  survey$FormalEducation,
+  c(
+    "I never completed any formal education" = 1,
+    "Primary/elementary school" = 1,
+    "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)" = 1,
+    
+    "Professional degree (JD, MD, etc.)" = 2,
+    "Some college/university study without earning a degree"  = 2,
+    "Associate degree" = 2,
+    
+    "Bachelor’s degree (BA, BS, B.Eng., etc.)"  = 3,
+    "Master’s degree (MA, MS, M.Eng., MBA, etc.)" = 3,
+    "Other doctoral degree (Ph.D, Ed.D., etc.)" = 3
+  )
+) %>%
+  as.factor()
+```
+
+* `CompanySize` - This `characteristic` feature has `eight levels` that `can be ordered in a logical way`, from "Fewer than 10 employees", to "10,000 or more employees".  
+
+Because this feature can be `ordered in a logical way`, it will be grouped in three categories:
+
++ `Small company size`: "Fewer than 10 employees", "10 to 19 employees" and "20 to 99 employees", encoded to 1
++ `Medium company size`: "100 to 499 employees" and "500 to 999 employees", encoded to 2
++ `Big comopany size`: "1,000 to 4,999 employees", "5,000 to 9,999 employees" and "10,000 or more employees", encoded to 3
+
+Below more details about the encoding can be found:
+
+```{r echo= FALSE, results='asis'}
+unique(survey$CompanySize) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$CompanySize <- plyr::revalue(
+  survey$CompanySize,
+  c(
+    "Fewer than 10 employees" = 1,
+    "10 to 19 employees" = 1,
+    "20 to 99 employees" = 1,
+    
+    "100 to 499 employees" = 2,
+    "500 to 999 employees" = 2,
+    
+    "1,000 to 4,999 employees"  = 3,
+    "5,000 to 9,999 employees" = 3,
+    "10,000 or more employees"  = 3
+    
+    )) %>% as.factor()
+
+```
+
+* `YearsCoding`: This `characteristic` feature has `eleven levels` that `can be ordered in a logical way`, from "0-2 years", to "30 or more years".  
+Because this feature can be `ordered in a logical way`, it will be grouped in three categories:
+
++ `Short experience coding`: "0-2 years" and "3-5 years", encoded to 1
++ `Medium experience coding`: "6-8 years", "9-11 years", "12-14 years" and "15-17 years", encoded to 2
++ `Long experience coding`: "18-20 years", "21-23 years", "24-26 years", "27-29 years", "30 or more years" and encoded to 3
+
+Below more details about the encoding can be found:
+
+```{r echo= FALSE, results='asis'}
+unique(survey$YearsCoding) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$YearsCoding <-
+  plyr::revalue(
+    survey$YearsCoding,
+    c(
+      "0-2 years" = 1, "3-5 years" = 1,
+      
+      "6-8 years" = 2, "9-11 years" = 2,
+      "12-14 years" = 2, "15-17 years"  = 2,
+      
+      "18-20 years" = 3, "21-23 years"  = 3,
+      "24-26 years"  = 3, "27-29 years" = 3,
+      "30 or more years" = 3
+      
+      )) %>% as.factor()
+
+```
+
+* `JobSatisfaction`: This `characteristic` feature has `seven levels` which `can be ordered in a logical way`, from "Extremely dissatisfied", to "Extremely satisfied", the same levels as the `dependent variable`.
+
+Because this feature can be `ordered in a logical way`, it will be grouped in three categories:
+
++ `Disatisfied`: "Extremely dissatisfied", "Moderately dissatisfied" and "Slightly dissatisfied", encoded to 1
++ `Neutral`: "Neither satisfied nor dissatisfied", encoded to 2
++ `Satisfied`: "Slightly satisfied", "Moderately satisfied" and "Extremely satisfied", encoded to 3
+
+Below more details about the encoding can be found:
+
+```{r echo= FALSE, results='asis'}
+unique(survey$JobSatisfaction) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$JobSatisfaction <-
+  plyr::revalue(
+    survey$JobSatisfaction,
+    c(
+      "Extremely dissatisfied" = 1,
+      "Moderately dissatisfied" = 1,
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Moderately satisfied" = 3,
+      "Extremely satisfied" = 3 
+      
+      )) %>% as.factor()
+
+```
+
+* `ConvertedSalary`: This is a `numerical continuous` variable. This feature was analyzed in a graph in order to find some `outliers`. Finally, twenty-two observations were deleted. All of them were greater than the `cutoff point` selected – `250,000 $`. Finally all the values were divided by 1000. 
+
+Below we can find a `scatter plot` of this feature, in `red` we can find the `cutoff point`:
+
+```{r echo= FALSE}
+plot(survey$ConvertedSalary, main="ConvertedSalary", xlab= '', ylab= '', col="steelblue")
+abline(h=250000, col="red")
+```
+
+We can find below the amount of observation which `ConvertedSalary` is greater than the `cutoff point`:
+
+```{r echo= TRUE, results='asis'}
+survey %>% 
+  filter(survey$ConvertedSalary > 250000) %>% 
+  nrow() %>% 
+  knitr::knit_print()
+```
+
+As we can we will remove 22 outliers:
+
+```{r echo= TRUE, results='hide'}
+survey <- survey %>% 
+  filter(survey$ConvertedSalary < 250000) 
+```
+
+Finally as mentioned before, all of the salaries will be divided by 1000:
+
+```{r echo= TRUE, results='hide'}
+survey$ConvertedSalary <- survey$ConvertedSalary / 1000
+```
+
+* `Hobby` - This `characteristic binomial` feature, “Yes” or “No”, was respectively transformed to “1” and “0”.
+
+```{r echo= FALSE, results='asis'}
+unique(survey$Hobby) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$Hobby <-
+  plyr::revalue(survey$Hobby,
+                c("No" = 0,
+                  "Yes" = 1)) %>% as.factor()
+```
+
+* `Age` - This `characteristic` feature has `six levels` that can be `ordered in a logical way`, from "Under 18 years old", to "55 - 64 years old".  
+Because this feature can be `ordered in a logical way`, it will be grouped in three categories:
+
++ `Early Adulthood` and `Adolescence`: "Under 18 years old" and "18 - 24 years old", encoded to 1
++ `Midlife`: "25 - 34 years old" and "35 - 44 years old", encoded to 2
++ `Mature Adulthood`:  "45 - 54 years old" and "55 - 64 years old", encoded to 3
+
+Below can be found more details about the encoding:
+
+```{r echo= FALSE, results='asis'}
+unique(survey$Age) %>% 
+  knitr::knit_print()
+```
+
+```{r echo= TRUE, results='hide'}
+survey$Age <-
+  plyr::revalue(
+    survey$Age,
+    c(
+      "Under 18 years old" = 1,
+      "18 - 24 years old" = 1,
+      
+      "25 - 34 years old" = 2,
+      "35 - 44 years old" = 2,
+      
+      "45 - 54 years old" = 3,
+      "55 - 64 years old" = 3
+    )) %>% as.factor()
+
+```
+
+As we saw above, the `characteristics` features were transformed `to factors`.
+
+After cleaning the data, the dataset contains `2,248 observations` and 9 features. 
+
+```{r echo= FALSE, results='asis'}
+paste("The dataset survey after the preparation has", dim(survey)[1], "rows and",  dim(survey)[2], "columns") %>% 
+  knitr::knit_print()
+```
+
+Finally, we will change the names of the columns, in order to remove the capital letters:
+
+```{r echo= TRUE, results='hide'}
+colnames(survey) <- c("career.satisfaction", "country", "education", "company.size", "years.coding", "job.satisfaction", "salary", "hobby", "age")
+
+```
+
+## 4.2) Data representation:
+
+Below there is a `summary` of the dataset:
+
+```{r echo= FALSE}
+describe(survey[,c(1:9)],) %>% 
+kable(align = "l",digits = 2)
+```
+*NOTE: The features with asterik are `factors`.
+ 
+In the next graph we can find the `distribution by levels` of the dependent variable. 
+
+```{r echo= FALSE}
+counts <- table(survey[1])
+barplot(counts, main= names(survey[1]), ylab= NULL, col="steelblue")
+```
+
+As we can observe the data is `imbalanced`. There are much more people with the level 3 `satisfied` than the other levels, 1 `disatisfied` and 2 `neutral`.
+
+Below we can find a representation of the `covariates`:
+
+```{r echo= FALSE}
+par(mar=c(2,1,2,1), mfrow=c(2, 3), cex= 0.6)
+a <- c(3, 4, 5, 6, 8, 9)
+for(i in a) {
+  counts <- table(survey[i])
+  barplot(counts, main= names(survey[i]), ylab= NULL, col="steelblue")
+}
+```
+
+```{r echo=FALSE, echo = F, results = 'hide', message= FALSE}
+par(mfrow=c(1,1))
+```
+
+```{r echo= FALSE}
+par(mar=c(2,1,2,1), mfrow=c(2, 1), cex= 0.6)
+counts <- table(survey[2])
+barplot(counts, main= names(survey[2]), ylab= NULL, col="steelblue", las= 1)
+d <- density(survey$salary)
+plot(d, main="salary", xlab= '', ylab= '', yaxt='n')
+polygon(d, col="steelblue", border="black")
+```
+
+```{r echo=FALSE, echo = F, results = 'hide', message= FALSE}
+par(mfrow=c(1,1))
+```
+
+Analyzing the table and graph, one can extract several `characteristics of the respondents`:
++ Most of them are from `Poland`.
++ Their level of `education is high`.
++ The majority works in `small/medium size companies`.
++ Most of them are `amateur`, because in general they have not long experience.
++ Mostly, they are `satisfied with their jobs`.
++ They are `young`.
++ `Coding is a hobby` for most of them.
++ The most common `average salary` is around `31,000 $ per year`.
+
+# 5) Application of Econometric models:
+
+```{r echo = F, results = 'hide', message= FALSE}
+
+```
+
+
+# 5) Application of Econometric models:
+
+In our study we will use ordered choices logit model to test hypotheses proposed in the introduction section. 
+
+Model for ordered choices first time was described in a regression form by McElvey and Zavoina in 1975^[McElvey, R. and W. Zavoina, 1975. “A Statistical Model for the Analysis of Ordered Level Dependent Variables,” Journal of Mathematical Sociology, 4, pp. 103-120.]. The model was inspired as to model data of individuals ordered responses and choices, and to create a method for estimations. The examples of this kind of data are bonds ratings, health status information, customer preferences surveys, satisfaction surveys and etc. The main idea is that outcomes can be ordered (Greene and Hensher 2009)^[Greene, W.H., and Hensher, D.A., 2009, Modeling Ordered Choices, pp. 83-90]. 
+
+Our model is specified as follows:
+
+HERE!!!
+
+
+## 5.1) Ordered Choice Models:
+
+Let's estimate order logit for `career.satisfaction`. First way to do so is to use `polr` function. We will use `career.satisfaction` as dependent variable and covariates `salary`, `hobby`, and `years.coding` and current `job.satisfaction` as independent variables to explain `career.satisfaction`.
+
+
+```{r echo = T, message= FALSE}
+ologit = polr(career.satisfaction~salary+hobby+years.coding, data=survey)
+summary(ologit)
+```
+
+We obtained t-values which is defined as ratio between value and standard error.
+
+Since we do not have p-value in the summary, we will call coefficients separately. 
+
+```{r echo = T, message= FALSE, results='asis'}
+options(scipen=999)
+coeftest(ologit)
+stargazer(coeftest(ologit), type = "latex")
+```
+
+
+As a result, we can see that `salary` is the most significant, then comes `hobby` and `years.coding2`. While `years.coding3` is the least significant variable in our model as p-value for this variable is more than 5% threshold. 
+
+visualizing the p-values of the variables:
+
+
+```{r echo = T, message= FALSE}
+jtools::plot_summs(ologit, scale = TRUE, plot.distributions = TRUE, inner_ci_level = .9)
+```
+
+
+**Interpreting the parameters**
+
+We can interpret signs of the estimates, we cannot interpret their values quantitatively but only qualitatively.
+
+`salary:` Marginal effect of the very first alternative, in our case it is "dissatisfied" will have the opposite sign than the parameter.
+So if salary increases then the probability of a person being "dissatisfied" with career decreases.
+
+`hobby:` Same applies to the variable - hobby. A person with hobby has less probability to be "dissatisfied" with career.
+
+`years.coding2:` The opposite is true with years.coding2. When a person has `years.coding2`, in other words, person with medium experience, more likely to be "dissatisfied" with career.  
+
+`years.coding3:` Person with years.coding3 or senior, more likely to be dissatisfied with career.
+
+We cannot interpret all levels of career.satisfaction but only first and the last in relation with the signs of parameters.
+
+
+## 5.2) Joint significance test:
+
+In the model we used covariates salary, hobby, and years.coding. Let's check if they are jointly significant. There is joint significance test in above output, so we will use likelihood ratio test. First, we will estimate model with a constant only and run `lrtest` to test hypotheses.
+
+
+```{r echo = T, message= FALSE, results='asis'}
+ologit.restricted = polr(career.satisfaction~1, data=survey)
+lrtest(ologit, ologit.restricted)
+stargazer(ologit, ologit.restricted, type = "latex")
+```
+
+
+In our case `null hypothesis` is that parameters `salary=0`, `hobby=0`, and `years.coding=0`. In other words they are insignificant.For this hypotheses we obtained test statistics equal to 44.981 and p-value is almost 0, much below than 5% threshold. Therefore, we have to reject `null hypothesis` that those three variables are jointly insignificant. So they are jointly significant. 
+
+
+## 5.3) Goodness-of-fit test:
+
+To check the goodness of fit, we can use a couple of tests
+
+  + Lipsitz test
+  + Hosmer and Lemeshow test 
+  + Pulkstenis-Robinson chi-squared test
+  + Brant test
+  
+```{r echo = T, message= FALSE}
+lipsitz.test(ologit)
+
+```
+
+`Lipsitz` goodness-of-fit test says that we cannot reject null hypothesis. P-value is greater than 5% threshold. This means that the fitted model satisfies the proportional odds assumption. In other words we have good specifications for the for the model.  
+
+
+```{r echo = T, message= FALSE}
+logitgof(survey$career.satisfaction, fitted(ologit), g = 5, ord = TRUE)
+
+```
+
+Ordinal Logit `Hosmer and Lemeshow` test indicates also the same as in `Lipsitz` test, we cannot reject null hypothesis because p-value is more than 5% threshold, we have correct specifications for the model. If p-value was less than 5% it would meant that according to the test we have incorrect specifications. If we change number of groups, e.g. g = 10, the test says the same - p-value more than 5%.
+
+```{r echo = T, message= FALSE}
+pulkrob.chisq(ologit, c("salary"))
+
+```
+
+`Pulkstenis-Robinson` chi-squared test indicates the same as the other tests. P-value is more than 5%, we cannot reject null hypothesis, our model has correct specifications.
+
+```{r echo = T, message= FALSE}
+brant(ologit)
+
+```
+
+
+`Brant` test is to test the parallel regression assumption.
+It tests the main assumption of the order logit model that we have proportional odds assumption met, in other words if odds are constant. On any level of outcome variable level the odds should be the same. In the output p-value of omnibus test says that we cannot reject null hypothesis, therefore odds assumption met and we can use ordered logit model. 
+
+**Order logit model with ologit.reg function**
+
+Let's estimate the model with different function `ologit.reg`.
+
+```{r echo = T, message= FALSE}
+ologit_a = logit.reg(career.satisfaction~salary+hobby, data = survey)
+summary(ologit_a)
+
+```
+
+`ologit.reg` functions allows us to obtain p-values as well. 
+
+
+## 5.4) Marginal effects:
+
+```{r echo = T, message= FALSE}
+options(scipen=999)
+margins.oglmx(ologit_a)
+
+```
+
+We will interpret marginal effects or each level of dependent variable from 1 to 3 or from "dissatisfied" to "satisfied".
+
+The first `outcome = 1` is "dissatisfied" with career. 
+People who have hobby has `5.9` pts less probability to be dissatisfied with career than those people who do not have hobby.
+If income increases by 1K USD, the probability of having this outcome decreases by `0.2%`.
+
+The second `outcome =2` is "neutral".
+People who have hobby has `1.4` pts less probability to have this outcome than those people who do not have hobby.
+If income increases by 1K USD, the probability of having this outcome decreases by `0.05%`.
+
+The third `outcome =3` "satisfied".
+People who have hobby has `7` pts more probability to have this outcome than those people who do not have hobby.
+If income increases by 1K USD, the probability of having this outcome increases by `2.5` pts.
+
+These marginal effects are obtained for average characteristics in the sample. To obtain marginal effects on user given characteristics. Let's call `ome.R` function. The function is written by Rafał Woźniak PhD. To use `ome.R` function we will need to create model using `polr` function.  
+
+```{r echo = T, message= FALSE}
+
+model = polr(career.satisfaction~salary+hobby, data = survey, method = "logistic")
+summary(model)
+```
+
+
+Let's create user given characteristics for example `salary` at the level of 30K USD and people with `hobby`. 
+
+```{r echo = T, message= FALSE}
+
+x = c(30, 1)
+ome(model, x)
+
+```
+
+
+By calling `ome` function, we have a matrix where we see marginal effects of `salary` and hobby at given levels for each alternatives from 1 to 3. For example, people with `hobby` have 5.3 pts less probability of having alternative1 (dissatisfied with career).
+
+
+## 5.5) General-to-specific approach
+
+Let's estimate ordered logit model using function `ologit.reg`:
+
+```{r echo = T, message= FALSE}
+ologit1 = ologit.reg(career.satisfaction~salary+years.coding+
+                      education+company.size+hobby+age+
+                      job.satisfaction+country, data=survey)
+
+summary(ologit1)
+
+```
+
+
+
+We can see that there are some variables that are insignificant.
+
+One school of econometric (London School of Economics) uses this approach to find out the significant variables for the model. We start with wider model. Some researchers start with all variables or just selecting the most important variables that we think that may affect the dependent variable. Then we will reduce the model step by step. The suggested approach is to test joint hypothesis step by step instead of simple hypothesis to avoid error.
+
+**Step 1**
+
+In `step 1` let's estimate model without insignificant variables. Firstly, we will create dummy variables for `years.coding`, `education`, `company.size`, `age`, `job.satisfaction`, `country`. 
+
+```{r echo = T, include=FALSE, message= FALSE}
+
+# Let's create dummy variables for "years.coding", "education", "company.size",
+#"age", "job.satisfaction", "country". 
+
+# Dummy variables for "years.coding"
+survey$years.coding.amateur <- 0
+survey$years.coding.middle <- 0
+survey$years.coding.senior <- 0
+
+survey$years.coding.amateur[survey$years.coding == "1"] = 1
+survey$years.coding.middle[survey$years.coding == "2"] = 1
+survey$years.coding.senior[survey$years.coding == "3"] = 1
+
+
+# Dummy variables for "education"
+survey$education1 <- 0
+survey$education2 <- 0
+survey$education3 <- 0
+
+
+survey$education1[survey$education == "1"] = 1
+survey$education2[survey$education == "2"] = 1
+survey$education3[survey$education == "3"] = 1
+
+
+# Dummy variables for "company.size"
+survey$company.small <- 0
+survey$company.middle <- 0
+survey$company.big <- 0
+
+
+survey$company.small[survey$company.size == "1"] = 1
+survey$company.middle[survey$company.size == "2"] = 1
+survey$company.big[survey$company.size == "3"] = 1
+
+
+# Dummy variables for "age"
+survey$age1 <- 0
+survey$age2 <- 0
+survey$age3 <- 0
+
+
+survey$age1[survey$age == "1"] = 1
+survey$age2[survey$age == "2"] = 1
+survey$age3[survey$age == "3"] = 1
+
+
+# Dummy variables for "job.satisfaction"
+survey$job.dissatisfied <- 0
+survey$job.neutral <- 0
+survey$job.satisfied <- 0
+
+
+survey$job.dissatisfied[survey$job.satisfaction == "1"] = 1
+survey$job.neutral[survey$job.satisfaction == "2"] = 1
+survey$job.satisfied[survey$job.satisfaction == "3"] = 1
+
+
+# Dummy variables for "country"
+survey$BY <- 0
+survey$BG <- 0
+survey$CZ <- 0
+survey$HU <- 0
+survey$PL <- 0
+survey$RO <- 0
+survey$SK <- 0
+survey$TR <- 0
+survey$UA <- 0
+
+survey$BY[survey$country == "Belarus"] = 1
+survey$BG[survey$country == "Bulgaria"] = 1
+survey$CZ[survey$country == "Czech Republic"] = 1
+survey$HU[survey$country == "Hungary"] = 1
+survey$PL[survey$country == "Poland"] = 1
+survey$RO[survey$country == "Romania"] = 1
+survey$SK[survey$country == "Slovakia"] = 1
+survey$TR[survey$country == "Turkey"] = 1
+survey$UA[survey$country == "Ukraine"] = 1
+
+
+```
+
+According to the model we can see that the significant variables are `salary`, `hobby1`, `years.coding2`(dummy variable = `years.coding.middle`), `job.satisfaction2` (dummy variable = `job.satisfaction.neutral`), and `job.satisfaction3` (dummy variable = `job.satisfaction.satisfied`). 
+
+Let's estimate model with mentioned variables so without insignificant variables.
+
+```{r echo = T, message= FALSE}
+ologit1a = ologit.reg(career.satisfaction~salary+years.coding.middle+hobby+
+                        job.neutral+job.satisfied, data=survey)
+
+
+summary(ologit1a)
+
+```
+
+
+Let's apply `lrtest` test to check whether all insignificant variables are jointly insignificant.
+
+```{r echo = T, message= FALSE}
+lrtest(ologit1, ologit1a)
+
+```
+
+
+In our case `null hypothesis` is that parameters `salary=0`, `hobby=0`, and `years.coding=0`. In other words they are insignificant.For this hypotheses we obtained Chi-squared statistics equal to `19.286` and p-value is more than `5%` threshold. Therefore, we cannot reject `null hypothesis`. So it is true that all insignificant variables are jointly insignificant. So they are jointly insignificant. We removed the insignificant variables all together at once. We will not need to move other steps of general-to-specific approach as we already see that we can remove all insignificant variables together. We will stop at `step 1`. We obtained final model for age:
+
+HERE!!
+
+In the final model we can see that `career.satisfaction` is explained with `salary`, `hobby`, `years.coding.middle`, `job.neutral`, and `job.satisfied variables`.
+
+# 6) Results:
+
+In the beginning, we described that we would test two hypothesis
+
+  **Hypothesis 1:** Higher salary increases career satisfaction
+
+  **Hypothesis 2:** Having hobby increases career satisfaction
+
+We modeled our data with ordered choices logit model. We created different models with different variables. Also, models with significant and insignificant variables. We applied test to check goodness-of-fit and likelihood tests, we also applied general to specific approach and we come to the final model as shown in above section.
+
+According to our final model and findings stemmed from the analysis we verified the first hypothesis. `Salary` variable is in thousand USD. When `salary` increases with 1K USD we see that people are more satisfied with career. This is normal also in real life. People are seeking financial stability. Moving from one company to another and moving up to the ladder of the career to have better financial situation. The more salary they earn it is more likely to stay in the company and to claim that you are satisfied with your career.
+
+The second hypothesis very interesting. Our analysis proved that people who have `hobby` are more satisfied with career comparing with people who do not have `hobby`. If we take example from life, when we are satisfied with we have time to do something we are passionate about outside of our everyday work environment. For IT professionals, having `hobby` could be even crucial as their work could be very stressful. 
+
+Outcomes of the study may help HR strategists to define strategies that aims increase of `career satisfaction` among IT employees. Making clear what are the factors of salary increase could be important for `career satisfaction` of programmers that would lead them to be more committed to the company. 
+
+Nevertheless, there are many aspects that could further develop the study. Incorporating additional demographic and psychological variables could improve the efficiency of the model. 
+
+# 7) Findings
+
+The main finding of this study is that the main factors that impact on `career satisfaction` are `salary`, `hobby` and current `job satisfaction`. Person that said that she is satisfied with current job, has hobby and high salary is more likely to be satisfied with career. 
+
+On the other hand, we came to conclusions that `age`, numbers of `years spent on coding` and the `county` does not impact `career satisfaction`. Programmers in different central and eastern European countries have similar results. It is also very surprising that `career satisfaction` is not related to the `age`. 
+
+There are some limitations to our study. Although our dataset contains more than `2,248` observations the data for the efficient econometric model could be larger. It would be interesting to include additional variables that have impact on career satisfaction such as demography, family status, job orientation, and etc. For example, people who has more decision power and have more rights at work to influence with their recommendations they are more likely to be satisfied with the career than those who do not have any decision power at work. Also, those professionals who  feel more that their work is aligned to the company strategy may feel more satisfied with the career. 
+
+For future studies it is good to compare western and eastern countries. Introducing other western countries into the model we may have different outcome. We expect country variable to become more significant. Also, job orientation, managerial statuses and related variables may influence the model. In the introduction we described how strong relationship is between life satisfaction and career satisfaction. Incorporating psychological aspects to the study may have different settings of the final model. 
+
+
+# 8) R Packages:
+
+1. MASS: [https://www.rdocumentation.org/packages/MASS/versions/7.3-47] 
+2. lmtest: [https://cran.r-project.org/web/packages/lmtest/lmtest.pdf]
+3. oglmx: [https://cran.r-project.org/web/packages/oglmx/oglmx.pdf]
+4. dplyr: [https://cran.r-project.org/web/packages/dplyr/dplyr.pdf]
+5. generalhoslem: [https://cran.r-project.org/web/packages/generalhoslem/generalhoslem.pdf] 6. jtools: [https://cran.r-project.org/web/packages/jtools/jtools.pdf]
+7. brant: [https://cran.r-project.org/web/packages/brant/brant.pdf]
+8. DescTools: [https://cran.r-project.org/web/packages/DescTools/DescTools.pdf]
+9. pscl: [https://cran.r-project.org/web/packages/pscl/pscl.pdf]
+10. stargazer: [https://cran.r-project.org/web/packages/stargazer/stargazer.pdf]
+11. psych: [https://cran.r-project.org/web/packages/psych/psych.pdf]
+12. knitr: [https://cran.r-project.org/web/packages/knitr/knitr.pdf]
+
+# 9) Bibliography: 
+
+
+
+
+
+
+
+
+
+
+
+
+
