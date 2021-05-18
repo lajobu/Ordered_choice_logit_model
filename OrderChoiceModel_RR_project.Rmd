@@ -34,15 +34,8 @@ library(pscl)
 library(stargazer)
 ```
 
-```{r echo = T, results = 'hide', message= FALSE}
-rstudioapi::getActiveDocumentContext()$path %>% 
-  dirname
-```
-
 ```{r echo = F, results = 'hide', message= FALSE, warning=FALSE}
-setwd(rstudioapi::getActiveDocumentContext()$path %>% 
-  dirname) # relative path added
-survey <- read.csv("survey_results_public.csv")
+survey <- read.csv("survey_results_public_2019.csv") # for 2019 instead of 2018
 source("ome.R")
 ```
 
@@ -123,9 +116,15 @@ First of all, we `selected several columns`, based on our `intuition`, trying to
 
 ```{r echo= TRUE, results='asis'}
 survey <- survey %>%
-  dplyr::select(CareerSatisfaction, Country, FormalEducation, 
-                CompanySize, YearsCoding, JobSatisfaction, 
-                ConvertedSalary, Hobby, Age)
+  dplyr::select(CareerSat, Country, EdLevel, 
+                OrgSize, YearsCode, JobSat, 
+                ConvertedComp, Hobbyist, Age) # the column names are different from 2018 survey
+```
+
+```{r echo= TRUE, results='asis'}
+colnames(survey) <- c('CareerSatisfaction', 'Country', 'FormalEducation', 
+                'CompanySize', 'YearsCoding', 'JobSatisfaction', 
+                'ConvertedSalary', 'Hobby', 'Age') # changed as per the same names of 2018 survey
 ```
 
 In some questions the respondents had the option to not reply, having the option to leave in blank some of them. For this reason, we `excluded the missing value and nulls`, consequently we assume that `programmers are people who are employed and receive salary`. This assumption was motivated by the empty values in the columns `ConvertedSalary` and `CompanySize`. Apart from that, we considered `only programmers that gave their Age`.
@@ -174,15 +173,13 @@ unique(survey$CareerSatisfaction) %>%
 survey$CareerSatisfaction <-
   plyr::revalue(
     survey$CareerSatisfaction,
-    c("Extremely dissatisfied" = 1,
-      "Moderately dissatisfied" = 1,
+    c("Very dissatisfied" = 1, # changed extremly to very, before there were 7 levels, now just 5
       "Slightly dissatisfied" = 1,
       
       "Neither satisfied nor dissatisfied" = 2,
       
       "Slightly satisfied" = 3,
-      "Moderately satisfied" = 3,
-      "Extremely satisfied" = 3)) %>% as.factor()
+      "Very satisfied" = 3)) %>% as.factor()
 ```
 
 * `Country`: This `characteristic` feature was previously described. However, after removing missing values there is one country less (Moldova), hence we will have `nine countries`. It `cannot be ordered in a logical way`, hence it will be encoded, but it will be transformed to `factor`.
@@ -229,7 +226,7 @@ survey$FormalEducation <- plyr::revalue(
     "Other doctoral degree (Ph.D, Ed.D., etc.)" = 3
   )
 ) %>%
-  as.factor()
+  as.factor() # it states the same
 ```
 
 * `CompanySize` - This `characteristic` feature has `eight levels` that `can be ordered in a logical way`, from "Fewer than 10 employees", to "10,000 or more employees".  
@@ -251,7 +248,7 @@ unique(survey$CompanySize) %>%
 survey$CompanySize <- plyr::revalue(
   survey$CompanySize,
   c(
-    "Fewer than 10 employees" = 1,
+    "2-9 employees" = 1, # changed from "Fewer than 10 employees" to "2-9 employees"
     "10 to 19 employees" = 1,
     "20 to 99 employees" = 1,
     
@@ -277,25 +274,16 @@ Below more details about the encoding can be found:
 
 ```{r echo= FALSE, results='asis'}
 unique(survey$YearsCoding) %>% 
-  knitr::knit_print()
+  knitr::knit_print() # format change, intead of groups, there are just values
 ```
 
 ```{r echo= TRUE, results='hide'}
-survey$YearsCoding <-
-  plyr::revalue(
-    survey$YearsCoding,
-    c(
-      "0-2 years" = 1, "3-5 years" = 1,
-      
-      "6-8 years" = 2, "9-11 years" = 2,
-      "12-14 years" = 2, "15-17 years"  = 2,
-      
-      "18-20 years" = 3, "21-23 years"  = 3,
-      "24-26 years"  = 3, "27-29 years" = 3,
-      "30 or more years" = 3
-      
-      )) %>% as.factor()
+survey$YearsCoding[survey$YearsCoding == "Less than 1 year"] <- 1
+survey$YearsCoding[survey$YearsCoding %in% (3:5)] <- 1
 
+survey$YearsCoding[survey$YearsCoding %in% (6:17)] <- 2
+
+survey$YearsCoding[survey$YearsCoding %in% (18:50)] <- 3 
 ```
 
 * `JobSatisfaction`: This `characteristic` feature has `seven levels` which `can be ordered in a logical way`, from "Extremely dissatisfied", to "Extremely satisfied", the same levels as the `dependent variable`.
@@ -314,21 +302,16 @@ unique(survey$JobSatisfaction) %>%
 ```
 
 ```{r echo= TRUE, results='hide'}
-survey$JobSatisfaction <-
+survey$JobSatisfaction <- # same change as CareerSatisfaction
   plyr::revalue(
     survey$JobSatisfaction,
-    c(
-      "Extremely dissatisfied" = 1,
-      "Moderately dissatisfied" = 1,
+    c("Very dissatisfied" = 1, # changed extremly to very, before there were 7 levels, now just 5
       "Slightly dissatisfied" = 1,
       
       "Neither satisfied nor dissatisfied" = 2,
       
       "Slightly satisfied" = 3,
-      "Moderately satisfied" = 3,
-      "Extremely satisfied" = 3 
-      
-      )) %>% as.factor()
+      "Very satisfied" = 3)) %>% as.factor()
 
 ```
 
@@ -387,25 +370,21 @@ Because this feature can be `ordered in a logical way`, it will be grouped in th
 Below can be found more details about the encoding:
 
 ```{r echo= FALSE, results='asis'}
-unique(survey$Age) %>% 
-  knitr::knit_print()
+unique(survey$Age)
 ```
 
 ```{r echo= TRUE, results='hide'}
-survey$Age <-
-  plyr::revalue(
-    survey$Age,
-    c(
-      "Under 18 years old" = 1,
-      "18 - 24 years old" = 1,
-      
-      "25 - 34 years old" = 2,
-      "35 - 44 years old" = 2,
-      
-      "45 - 54 years old" = 3,
-      "55 - 64 years old" = 3
-    )) %>% as.factor()
+survey$Age <- survey$Age %>% 
+  as.integer()
 
+survey$Age[survey$Age %in% (0:24)] <- 1
+
+survey$Age[survey$Age %in% (25:44)] <- 2
+
+survey$Age[survey$Age %in% (45:100)] <- 3 
+
+survey$Age <- survey$Age %>% 
+  as.factor()
 ```
 
 As we saw above, the `characteristics` features were transformed `to factors`.
@@ -483,10 +462,6 @@ Analyzing the table and graph, one can extract several `characteristics of the r
 
 # 5) Application of Econometric models:
 
-```{r echo = F, results = 'hide', message= FALSE}
-
-```
-
 
 # 5) Application of Econometric models:
 
@@ -496,18 +471,21 @@ Model for ordered choices first time was described in a regression form by McElv
 
 Our model is specified as follows:
 
-HERE!!!
+```{r echo = T, message= FALSE}
+ologit <- polr(career.satisfaction~salary+hobby+years.coding, data=survey)
+ologit$call
+```
 
 
 ## 5.1) Ordered Choice Models:
 
 Let's estimate order logit for `career.satisfaction`. First way to do so is to use `polr` function. We will use `career.satisfaction` as dependent variable and covariates `salary`, `hobby`, and `years.coding` and current `job.satisfaction` as independent variables to explain `career.satisfaction`.
 
-
 ```{r echo = T, message= FALSE}
-ologit = polr(career.satisfaction~salary+hobby+years.coding, data=survey)
-summary(ologit)
+ologit %>% 
+  summary()
 ```
+
 
 We obtained t-values which is defined as ratio between value and standard error.
 
@@ -836,16 +814,3 @@ For future studies it is good to compare western and eastern countries. Introduc
 12. knitr: [https://cran.r-project.org/web/packages/knitr/knitr.pdf]
 
 # 9) Bibliography: 
-
-
-
-
-
-
-
-
-
-
-
-
-
