@@ -1,0 +1,740 @@
+---
+title: 'Reproducible Research project: Econometric model'
+author: 'Jorge Bueno Perez & Noam Shmuel'
+classoption: twocolumn
+output:
+  html_document:
+    highlight: tango
+    lib_dir: libs
+    self_contained: yes
+    theme: spacelab
+    toc: yes
+    toc_float: yes
+  pdf_document:
+    toc: yes
+  word_document:
+    toc: yes
+---
+
+```{r echo = F, results = 'hide', message= FALSE}
+library(dplyr)
+library(knitr)
+library(psych)
+library(MASS)
+library(lmtest)
+library(oglmx)
+library(generalhoslem)
+library(jtools)
+library(brant)
+library(DescTools)
+library(pscl)
+library(stargazer)
+```
+
+```{r echo = F, results = 'hide', message= FALSE, warning=FALSE}
+survey <- read.csv("survey_results_public.csv") # for 2018
+survey1 <- read.csv("survey_results_public_2019.csv") # for 2019
+source("ome.R") # fuctioon provided by the teacher
+```
+
+# 1) `Project description`
+
+The main purpose of the project is to **reproduce an econometric analysis**: "Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe”, that was created by one of us during **Advance Econometrics classes** one year ago.
+
++ Moreover, we are interested in **analyzing the following**:
+
+  - Find **differences in the results** due to updates of R, used packages, different computers (the original project was run on a computer that is not anymore in use), or any other reason.
+  - Find ways to **improve the model**, **code**, **repository** or **rmarkdown presentation**.
+  - Find **differences in the model when applied to a new data** (2019 intead of 2018).
+
+# 2) `General overview`
+
+The **econometric model** main purpose was to create an **ordered choice logit model** to estimate for **career satisfaction of programmers in Eastern European countries**. 
+
+The data is based on the **online survey results** collected by  **StackOverlFlow.com** in **2018**, and it is important to remark that the survey is **launched one time per year**.
+
++  It will be verified the following **hypothesis**:
+
+  **Hypothesis 1:** Higher salary increases career satisfaction
+
+  **Hypothesis 2:** Having hobby increases career satisfaction
+
+# 3) `Main changes`
+
+## 3.1) Differences in the results
+
+The original model was run in the old computer of one of the participants (mac). However, after running the model one year later in two different computers (mac and windows), the same results were obtaioned (same p-values and in general all the estatistics).
+
+## 3.2) GitHub repository
+
+A **GitHub repository was created one year ago** by one of us, hence, it was decided to just **add a contributor** to the project instead of creating a new repository or just forking the project. 
+
+This allows to **avoid the need of having pull request**, due to the fact both contributor are allow to push changes to the production branch (master).
+
++ Link to the project repository:
+
+  - https://github.com/lajobu/Ordered_choice_logit_model
+
+On the other hand, the **data was not pushed due to the limit of a 100mb** which does not allow to publish larghe files.
+
+However, we found out a work around with **Git Large File Storage**, this open source Git extension allow one to publish large files (LFS), however, there is a **limit of 1GB of free storage and 1GB a month of free bandwidth**.
+
++ More information can be found: 
+
+  - https://git-lfs.github.com/
+  - https://docs.github.com/en/github/managing-large-files/about-storage-and-bandwidth-usage
+
+## 3.3) `Rmarkdown`
+
+For the purpose of the presentation in the present Rmarkdown we used **classoption: twocolumn** which allows to have two columns of code, and it is really usefull when comparing two results.
+
+## 3.4) `2019 data changes`
+
+### 3.4.1) `Data description`
+
+Before data cleaning
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+```{r echo= F, results='asis'}
+paste("The dataset in 2018 initialy has", dim(survey)[1], "rows and",  dim(survey)[2], "columns") %>% 
+  knitr::knit_print()
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+```{r echo= F, results='asis'}
+paste("The dataset in 2019 has", dim(survey1)[1], "rows and",  dim(survey1)[2], "columns") %>% 
+  knitr::knit_print()
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+It seems there were **lower nmumber of participants**, and **lower nmumber of questions** in **2019**
+
+### 3.4.2) `Data preparation`
+
++ Some of the original **columns names were changed in 2019 data**, even some of the **possible values**:
+
+  - The **CareerSatisfaction** feature chaged from **7 levels**, to just **5 levels**.
+  - The **JobSatisfaction** variable had the same changed as the previusly mentioned **CareerSatisfaction** variable.
+  - The **CompanySize** feature slighty changed the names of the categories.
+  - The **YearsCoding** feature totally changed, before it was **closed answer** with different options to choose from (for example category 6-8 years), however, this time it was an open question in which it was possible to provide a number.
+  - The **Age** variable had similar changed as the previusly mentioned **YearsCoding** variable.
+  
+All of the above columns were changed to the original format (2018 format), in order to be able to estimate the same model and compare with the one estimated for **2018**.
+
+```{r echo= F, results='asis'}
+survey <- survey %>%
+  dplyr::select(CareerSatisfaction, Country, FormalEducation, 
+                CompanySize, YearsCoding, JobSatisfaction, 
+                ConvertedSalary, Hobby, Age)
+```
+
+```{r echo= F, results='asis'}
+survey1 <- survey1 %>%
+  dplyr::select(CareerSat, Country, EdLevel, 
+                OrgSize, YearsCode, JobSat, 
+                ConvertedComp, Hobbyist, Age) # the column names are different from 2018 survey
+```
+
+```{r echo= F, results='asis'}
+colnames(survey1) <- c('CareerSatisfaction', 'Country', 'FormalEducation', 
+                'CompanySize', 'YearsCoding', 'JobSatisfaction', 
+                'ConvertedSalary', 'Hobby', 'Age') # changed as per the same names of 2018 survey
+```
+
+```{r echo= F, results='hide'}
+survey <- survey %>% 
+  filter(ConvertedSalary!=0) %>% 
+  na.omit(survey)
+
+survey1 <- survey1 %>% 
+  filter(ConvertedSalary!=0) %>% 
+  na.omit(survey1)
+```
+
+```{r echo= F, results='hide'}
+survey <- survey %>%
+  filter(
+    Country %in% c("Poland", "Czech Republic", "Hungary", "Slovakia", "Romania",
+      "Bulgaria", "Turkey", "Moldova", "Belarus", "Ukraine")) 
+
+survey1 <- survey1 %>%
+  filter(
+    Country %in% c("Poland", "Czech Republic", "Hungary", "Slovakia", "Romania",
+      "Bulgaria", "Turkey", "Moldova", "Belarus", "Ukraine")) 
+```
+
+```{r echo= F, results='hide'}
+survey$CareerSatisfaction <-
+  plyr::revalue(
+    survey$CareerSatisfaction,
+    c("Extremely dissatisfied" = 1,
+      "Moderately dissatisfied" = 1,
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Moderately satisfied" = 3,
+      "Extremely satisfied" = 3)) %>% as.factor()
+
+survey1$CareerSatisfaction <-
+  plyr::revalue(
+    survey1$CareerSatisfaction,
+    c("Very dissatisfied" = 1, # changed extremly to very, before there were 7 levels, now just 5
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Very satisfied" = 3)) %>% as.factor()
+```
+
+```{r echo= F, results='hide'}
+survey$Country <- survey$Country %>%
+  as.factor()
+
+survey1$Country <- survey1$Country %>%
+  as.factor()
+```
+
+```{r echo= F, results='hide'}
+survey$FormalEducation <- plyr::revalue(
+  survey$FormalEducation,
+  c(
+    "I never completed any formal education" = 1,
+    "Primary/elementary school" = 1,
+    "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)" = 1,
+    
+    "Professional degree (JD, MD, etc.)" = 2,
+    "Some college/university study without earning a degree"  = 2,
+    "Associate degree" = 2,
+    
+    "Bachelor’s degree (BA, BS, B.Eng., etc.)"  = 3,
+    "Master’s degree (MA, MS, M.Eng., MBA, etc.)" = 3,
+    "Other doctoral degree (Ph.D, Ed.D., etc.)" = 3
+  )
+) %>%
+  as.factor()
+
+survey1$FormalEducation <- plyr::revalue(
+  survey1$FormalEducation,
+  c(
+    "I never completed any formal education" = 1,
+    "Primary/elementary school" = 1,
+    "Secondary school (e.g. American high school, German Realschule or Gymnasium, etc.)" = 1,
+    
+    "Professional degree (JD, MD, etc.)" = 2,
+    "Some college/university study without earning a degree"  = 2,
+    "Associate degree" = 2,
+    
+    "Bachelor’s degree (BA, BS, B.Eng., etc.)"  = 3,
+    "Master’s degree (MA, MS, M.Eng., MBA, etc.)" = 3,
+    "Other doctoral degree (Ph.D, Ed.D., etc.)" = 3
+  )
+) %>%
+  as.factor() 
+```
+
+```{r echo= F, results='hide'}
+survey$CompanySize <- plyr::revalue(
+  survey$CompanySize,
+  c(
+    "Fewer than 10 employees" = 1,
+    "10 to 19 employees" = 1,
+    "20 to 99 employees" = 1,
+    
+    "100 to 499 employees" = 2,
+    "500 to 999 employees" = 2,
+    
+    "1,000 to 4,999 employees"  = 3,
+    "5,000 to 9,999 employees" = 3,
+    "10,000 or more employees"  = 3
+    
+    )) %>% as.factor()
+
+survey1$CompanySize <- plyr::revalue(
+  survey1$CompanySize,
+  c(
+    "Just me - I am a freelancer, sole proprietor, etc." = 1, 
+    "2-9 employees" = 1,
+    "10 to 19 employees" = 1,
+    "20 to 99 employees" = 1,
+    
+    "100 to 499 employees" = 2,
+    "500 to 999 employees" = 2,
+    
+    "1,000 to 4,999 employees"  = 3,
+    "5,000 to 9,999 employees" = 3,
+    "10,000 or more employees"  = 3
+    
+    )) %>% as.factor()
+```
+
+```{r echo= F, results='hide'}
+survey$YearsCoding <-
+  plyr::revalue(
+    survey$YearsCoding,
+    c(
+      "0-2 years" = 1, "3-5 years" = 1,
+      
+      "6-8 years" = 2, "9-11 years" = 2,
+      "12-14 years" = 2, "15-17 years"  = 2,
+      
+      "18-20 years" = 3, "21-23 years"  = 3,
+      "24-26 years"  = 3, "27-29 years" = 3,
+      "30 or more years" = 3
+      
+      )) %>% as.factor()
+
+survey1$YearsCoding[survey1$YearsCoding == "Less than 1 year"] <- 1
+survey1$YearsCoding[survey1$YearsCoding %in% (3:5)] <- 1
+survey1$YearsCoding[survey1$YearsCoding %in% (6:17)] <- 2
+survey1$YearsCoding[survey1$YearsCoding %in% (18:50)] <- 3 
+```
+
+```{r echo= F, results='hide'}
+survey$JobSatisfaction <-
+  plyr::revalue(
+    survey$JobSatisfaction,
+    c(
+      "Extremely dissatisfied" = 1,
+      "Moderately dissatisfied" = 1,
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Moderately satisfied" = 3,
+      "Extremely satisfied" = 3 
+      
+      )) %>% as.factor()
+
+survey1$JobSatisfaction <- # same change as CareerSatisfaction
+  plyr::revalue(
+    survey1$JobSatisfaction,
+    c("Very dissatisfied" = 1, # changed extremly to very, before there were 7 levels, now just 5
+      "Slightly dissatisfied" = 1,
+      
+      "Neither satisfied nor dissatisfied" = 2,
+      
+      "Slightly satisfied" = 3,
+      "Very satisfied" = 3)) %>% as.factor()
+```
+
++ `Outliers analysis`:
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+```{r echo= F, results='asis'}
+plot(survey$ConvertedSalary, main="ConvertedSalary", xlab= '', ylab= '', col="steelblue")
+abline(h=250000, col="red")
+```
+
+Number of outliers:
+
+```{r echo= F, results='asis'}
+survey %>% 
+  filter(survey$ConvertedSalary > 250000) %>% 
+  nrow() %>% 
+  knitr::knit_print()
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+```{r echo= F, results='asis'}
+plot(survey1$ConvertedSalary, main="ConvertedSalary", xlab= '', ylab= '', col="steelblue")
+abline(h=250000, col="red")
+```
+
+`Number of outliers:`
+
+```{r echo= F, results='asis'}
+survey1 %>% 
+  filter(survey1$ConvertedSalary > 250000) %>% 
+  nrow() %>% 
+  knitr::knit_print()
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+Considering only lower salaries than **250,000 $** seem that in **2019 there were 10 outliers more** than in 2018.
+
+```{r echo= F, results='hide'}
+survey <- survey %>% 
+  filter(survey$ConvertedSalary < 250000) 
+
+survey1 <- survey1 %>% 
+  filter(survey1$ConvertedSalary < 250000) 
+```
+
+```{r echo= F, results='hide'}
+survey$ConvertedSalary <- survey$ConvertedSalary / 1000
+
+survey1$ConvertedSalary <- survey1$ConvertedSalary / 1000
+```
+
+```{r echo= F, results='hide'}
+survey$Hobby <-
+  plyr::revalue(survey$Hobby,
+                c("No" = 0,
+                  "Yes" = 1)) %>% as.factor()
+
+survey1$Hobby <-
+  plyr::revalue(survey1$Hobby,
+                c("No" = 0,
+                  "Yes" = 1)) %>% as.factor()
+```
+
+```{r echo= F, results='hide'}
+survey$Age <-
+  plyr::revalue(
+    survey$Age,
+    c(
+      "Under 18 years old" = 1,
+      "18 - 24 years old" = 1,
+      
+      "25 - 34 years old" = 2,
+      "35 - 44 years old" = 2,
+      
+      "45 - 54 years old" = 3,
+      "55 - 64 years old" = 3
+    )) %>% as.factor()
+
+survey1$Age <- survey1$Age %>% 
+  as.integer()
+survey1$Age[survey1$Age %in% (0:24)] <- 1
+survey1$Age[survey1$Age %in% (25:44)] <- 2
+survey1$Age[survey1$Age %in% (45:100)] <- 3 
+survey1$Age <- survey1$Age %>% 
+  as.factor()
+```
+
+```{r echo= F, results='hide'}
+colnames(survey) <- c("career.satisfaction", "country", "education", "company.size", "years.coding", "job.satisfaction", "salary", "hobby", "age")
+
+colnames(survey1) <- c("career.satisfaction", "country", "education", "company.size", "years.coding", "job.satisfaction", "salary", "hobby", "age")
+```
+
+### 3.4.3) Data representation
+
+After data cleaning
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+Target variable:
+
+```{r echo= F, results='asis'}
+counts <- table(survey[1])
+barplot(counts, main= names(survey[1]), ylab= NULL, col="steelblue")
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+Target variable:
+
+```{r echo= F, results='asis'}
+counts <- table(survey1[1])
+barplot(counts, main= names(survey1[1]), ylab= NULL, col="steelblue")
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+As per the plot it seems the data is **similarly distributed in both years**, it is still **really imabalanced**, however, it is remarkable that the **second level (Neither satisfied nor dissatisfied) increased in 2019**. The reason behind could be due to the **number of available options**, which as mentioned before was **reduced from 7 to 5**.
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+Covariates:
+
+```{r echo= F, results='asis'}
+par(mar=c(2,1,2,1), mfrow=c(2, 3), cex= 0.6)
+a <- c(3, 4, 5, 6, 8, 9)
+for(i in a) {
+  counts <- table(survey[i])
+  barplot(counts, main= names(survey[i]), ylab= NULL, col="steelblue")
+}
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+Covariates:
+
+```{r echo= F, results='asis'}
+par(mar=c(2,1,2,1), mfrow=c(2, 3), cex= 0.6)
+a <- c(3, 4, 5, 6, 8, 9)
+for(i in a) {
+  counts <- table(survey1[i])
+  barplot(counts, main= names(survey1[i]), ylab= NULL, col="steelblue")
+}
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+It seems the distribution of the **covariates is similar**, however, it seems that the participants in **2019 have more coding experience** (years.coding). On the other hand, similarly to the target variable, the feature **job.satisfaction** increased the second level, probably due to the same reasons as presented before.
+
+### 3.4.4) Estimation
+
+`Ordered choice logit model`
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+```{r echo = F, message= FALSE, results='asis'}
+ologit <- polr(career.satisfaction~salary+hobby+years.coding, data=survey)
+options(scipen=999)
+stargazer(coeftest(ologit), type='html')
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+```{r echo = F, message= FALSE, results='asis'}
+ologit1 <- polr(career.satisfaction~salary+hobby+years.coding, data=survey1)
+options(scipen=999)
+stargazer(coeftest(ologit1), type='html')
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+The variable **years.coding3** was the least significant in 2018, and in 2019 is not significant at all. The rest of the variables **hobby** and **salary** remain significant.
+
+<br> </br>
+
+`Best model of 2018  applied on 2019`
+
+```{r echo = F, include=FALSE, message= FALSE}
+
+# Let's create dummy variables for "years.coding", "education", "company.size",
+#"age", "job.satisfaction", "country". 
+
+  # 2018
+
+# Dummy variables for "years.coding"
+survey$years.coding.amateur <- 0
+survey$years.coding.middle <- 0
+survey$years.coding.senior <- 0
+
+survey$years.coding.amateur[survey$years.coding == "1"] = 1
+survey$years.coding.middle[survey$years.coding == "2"] = 1
+survey$years.coding.senior[survey$years.coding == "3"] = 1
+
+
+# Dummy variables for "education"
+survey$education1 <- 0
+survey$education2 <- 0
+survey$education3 <- 0
+
+
+survey$education1[survey$education == "1"] = 1
+survey$education2[survey$education == "2"] = 1
+survey$education3[survey$education == "3"] = 1
+
+
+# Dummy variables for "company.size"
+survey$company.small <- 0
+survey$company.middle <- 0
+survey$company.big <- 0
+
+
+survey$company.small[survey$company.size == "1"] = 1
+survey$company.middle[survey$company.size == "2"] = 1
+survey$company.big[survey$company.size == "3"] = 1
+
+
+# Dummy variables for "age"
+survey$age1 <- 0
+survey$age2 <- 0
+survey$age3 <- 0
+
+
+survey$age1[survey$age == "1"] = 1
+survey$age2[survey$age == "2"] = 1
+survey$age3[survey$age == "3"] = 1
+
+
+# Dummy variables for "job.satisfaction"
+survey$job.dissatisfied <- 0
+survey$job.neutral <- 0
+survey$job.satisfied <- 0
+
+
+survey$job.dissatisfied[survey$job.satisfaction == "1"] = 1
+survey$job.neutral[survey$job.satisfaction == "2"] = 1
+survey$job.satisfied[survey$job.satisfaction == "3"] = 1
+
+
+
+# Dummy variables for "country"
+survey$BY <- 0
+survey$BG <- 0
+survey$CZ <- 0
+survey$HU <- 0
+survey$PL <- 0
+survey$RO <- 0
+survey$SK <- 0
+survey$TR <- 0
+survey$UA <- 0
+
+survey$BY[survey$country == "Belarus"] = 1
+survey$BG[survey$country == "Bulgaria"] = 1
+survey$CZ[survey$country == "Czech Republic"] = 1
+survey$HU[survey$country == "Hungary"] = 1
+survey$PL[survey$country == "Poland"] = 1
+survey$RO[survey$country == "Romania"] = 1
+survey$SK[survey$country == "Slovakia"] = 1
+survey$TR[survey$country == "Turkey"] = 1
+survey$UA[survey$country == "Ukraine"] = 1
+
+  # 2019:
+
+# Dummy variables for "years.coding"
+survey1$years.coding.amateur <- 0
+survey1$years.coding.middle <- 0
+survey1$years.coding.senior <- 0
+
+survey1$years.coding.amateur[survey1$years.coding == "1"] = 1
+survey1$years.coding.middle[survey1$years.coding == "2"] = 1
+survey1$years.coding.senior[survey1$years.coding == "3"] = 1
+
+# Dummy variables for "education"
+survey1$education1 <- 0
+survey1$education2 <- 0
+survey1$education3 <- 0
+
+survey1$education1[survey1$education == "1"] = 1
+survey1$education2[survey1$education == "2"] = 1
+survey1$education3[survey1$education == "3"] = 1
+
+# Dummy variables for "company.size"
+survey1$company.small <- 0
+survey1$company.middle <- 0
+survey1$company.big <- 0
+
+survey1$company.small[survey1$company.size == "1"] = 1
+survey1$company.middle[survey1$company.size == "2"] = 1
+survey1$company.big[survey1$company.size == "3"] = 1
+
+# Dummy variables for "age"
+survey1$age1 <- 0
+survey1$age2 <- 0
+survey1$age3 <- 0
+
+survey1$age1[survey1$age == "1"] = 1
+survey1$age2[survey1$age == "2"] = 1
+survey1$age3[survey1$age == "3"] = 1
+
+# Dummy variables for "job.satisfaction"
+survey1$job.dissatisfied <- 0
+survey1$job.neutral <- 0
+survey1$job.satisfied <- 0
+
+survey1$job.dissatisfied[survey1$job.satisfaction == "1"] = 1
+survey1$job.neutral[survey1$job.satisfaction == "2"] = 1
+survey1$job.satisfied[survey1$job.satisfaction == "3"] = 1
+
+# Dummy variables for "country"
+survey1$BY <- 0
+survey1$BG <- 0
+survey1$CZ <- 0
+survey1$HU <- 0
+survey1$PL <- 0
+survey1$RO <- 0
+survey1$SK <- 0
+survey1$TR <- 0
+survey1$UA <- 0
+
+survey1$BY[survey1$country == "Belarus"] = 1
+survey1$BG[survey1$country == "Bulgaria"] = 1
+survey1$CZ[survey1$country == "Czech Republic"] = 1
+survey1$HU[survey1$country == "Hungary"] = 1
+survey1$PL[survey1$country == "Poland"] = 1
+survey1$RO[survey1$country == "Romania"] = 1
+survey1$SK[survey1$country == "Slovakia"] = 1
+survey1$TR[survey1$country == "Turkey"] = 1
+survey1$UA[survey1$country == "Ukraine"] = 1
+```
+
+:::::::::::::: {.columns}
+::: {.column width="50%"}
+
+For **2018**:
+
+```{r echo = F, message= FALSE, warning=FALSE, results='asis'}
+ologit1a <- ologit.reg(career.satisfaction~salary+hobby+
+                        job.neutral+job.satisfied, data=survey)
+
+options(scipen=999)
+stargazer(coeftest(ologit1a), type='html')
+```
+
+:::
+::: {.column width="50%"}
+
+For **2019**:
+
+```{r echo = F, message= FALSE, warning=FALSE, results='asis'}
+ologit1b <- ologit.reg(career.satisfaction~salary+hobby+
+                        job.neutral+job.satisfied, data=survey1)
+
+options(scipen=999)
+stargazer(coeftest(ologit1b), type='html')
+```
+
+:::
+::::::::::::::
+
+<br> </br>
+
+It seems the sign of the estimators is the same, even the values did not change a lot, hence, it can be seen that **the conclusions for 2018 can be applied also to 2019**
+
+When **salary** increases 1K USD is appears that people are **more satisfied with career**.
+People **who have coding as a hobby** are **more satisfied with career** comparing with people who do not have coding as a hobby.
+
+# 4) `Final conclusions`
+
+- 

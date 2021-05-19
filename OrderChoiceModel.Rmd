@@ -35,7 +35,6 @@ library(stargazer)
 ```
 
 ```{r echo = F, results = 'hide', message= FALSE, warning=FALSE}
-setwd("/Users/Lajobu/Dev-projects/Ordered_choice_logit_model")
 survey <- read.csv("survey_results_public.csv")
 source("ome.R")
 ```

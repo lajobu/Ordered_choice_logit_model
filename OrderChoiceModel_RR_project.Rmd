@@ -248,7 +248,8 @@ unique(survey$CompanySize) %>%
 survey$CompanySize <- plyr::revalue(
   survey$CompanySize,
   c(
-    "2-9 employees" = 1, # changed from "Fewer than 10 employees" to "2-9 employees"
+    "Just me - I am a freelancer, sole proprietor, etc." = 1, 
+    "2-9 employees" = 1, 
     "10 to 19 employees" = 1,
     "20 to 99 employees" = 1,
     
@@ -261,6 +262,11 @@ survey$CompanySize <- plyr::revalue(
     
     )) %>% as.factor()
 
+```
+
+```{r echo= FALSE, results='asis'}
+unique(survey$CompanySize) %>% 
+  knitr::knit_print()
 ```
 
 * `YearsCoding`: This `characteristic` feature has `eleven levels` that `can be ordered in a logical way`, from "0-2 years", to "30 or more years".  
