@@ -360,6 +360,7 @@ survey %>%
 For **2019**:
 
 ```{r echo= F, results='asis'}
+options(scipen=5)
 plot(survey1$ConvertedSalary, main="ConvertedSalary", xlab= '', ylab= '', col="steelblue")
 abline(h=250000, col="red")
 ```
@@ -735,6 +736,9 @@ It seems the sign of the estimators is the same, even the values did not change 
 When **salary** increases 1K USD is appears that people are **more satisfied with career**.
 People **who have coding as a hobby** are **more satisfied with career** comparing with people who do not have coding as a hobby.
 
-# 4) `Final conclusions`
+# 4) Packages versions
 
-- 
+```{r echo = F, message= FALSE, warning=FALSE, results='asis'}
+installed.packages()[names(sessionInfo()$otherPkgs), "Version"] %>% 
+  kable()
+``` 
