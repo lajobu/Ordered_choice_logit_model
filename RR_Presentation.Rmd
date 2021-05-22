@@ -77,7 +77,7 @@ Adding a contributor allows to **avoid the need of having pull requests**, Moreo
 
 The **dataset was not pushed due to the limit of a 100 megabytes** which does not allow to publish large files.
 
-Trying to combat the files weight limits, we have found out a work around with [Git Large File Storage](https://git-lfs.github.com/). This open source Git extension allows one to publish large files (LFS), with a **limit of 1GB of free storage and 1GB a month of free bandwidth**.
+Trying to combat the files weight limits, we have found out a work around with [Git Large File Storage](https://git-lfs.github.com/).The idea behind Git Large File Storage (LFS) is to "*replace large files such as audio samples, videos, datasets, and graphics with text pointers inside Git, while storing the file contents on a remote server like*". This open source Git extension allows one to publish large files (LFS), with a **limit of 1GB of free storage and 1GB a month of free bandwidth**.
 
 + More information can be found: 
 
@@ -86,7 +86,7 @@ Trying to combat the files weight limits, we have found out a work around with [
 
 ## 3.3) `Rmarkdown`
 
-For the purpose of the presentation in the present Rmarkdown we used **classoption: twocolumn** which allows to have two columns of code, and it is really usefull when comparing two results.
+For the purpose of the presentation in the present Rmarkdown we used **classoption: twocolumn** which allows to have two columns of code, one next to the other at the same horizon length. This Rmarkdown feature is extremely  useful when comparing two different results and outcomes.
 
 ## 3.4) `2019 data changes`
 
@@ -100,7 +100,7 @@ Before data cleaning
 For **2018**:
 
 ```{r echo= F, results='asis'}
-paste("The dataset in 2018 initialy has", dim(survey)[1], "rows and",  dim(survey)[2], "columns") %>% 
+paste("The dataset in 2018 initialy has", dim(survey)[1], "observations and",  dim(survey)[2], "variables") %>% 
   knitr::knit_print()
 ```
 
@@ -110,7 +110,7 @@ paste("The dataset in 2018 initialy has", dim(survey)[1], "rows and",  dim(surve
 For **2019**:
 
 ```{r echo= F, results='asis'}
-paste("The dataset in 2019 has", dim(survey1)[1], "rows and",  dim(survey1)[2], "columns") %>% 
+paste("The dataset in 2019 has", dim(survey1)[1], "observations and",  dim(survey1)[2], "variables") %>% 
   knitr::knit_print()
 ```
 
@@ -119,41 +119,40 @@ paste("The dataset in 2019 has", dim(survey1)[1], "rows and",  dim(survey1)[2], 
 
 <br> </br>
 
-It seems there were **lower nmumber of participants**, and **lower nmumber of questions** in **2019**
+It seems there were **lower number of participants** and **lower number of questions** in **2019** survey compared to the equivalent of 2018.  
 
 ### 3.4.2) `Data preparation`
 
-+ Some of the original **columns names were changed in 2019 data**, even some of the **possible values**:
++ Some of the original **variables names were modified in 2019 dataset**, even some of the **possible values**:
 
-  - The **CareerSatisfaction** feature chaged from **7 levels**, to just **5 levels**.
-  - The **JobSatisfaction** variable had the same changed as the previusly mentioned **CareerSatisfaction** variable.
-  - The **CompanySize** feature slighty changed the names of the categories.
-  - The **YearsCoding** feature totally changed, before it was **closed answer** with different options to choose from (for example category 6-8 years), however, this time it was an open question in which it was possible to provide a number.
-  - The **Age** variable had similar changed as the previusly mentioned **YearsCoding** variable.
+  - The **CareerSatisfaction** variable was changed from **7 levels**, to just **5 levels**.
+  - The **JobSatisfaction** variable had the same modifications as **CareerSatisfaction** variable.
+  - The **CompanySize** variable had changes in its categories levels.
+  - The **YearsCoding** variable was totally changed. Previously it was **closed answer** with different options to choose from (for example category 6-8 years), this time , however, it was an open question where any number could be entered by the user. Same modification was with the *Age** variable.
   
-All of the above columns were changed to the original format (2018 format), in order to be able to estimate the same model and compare with the one estimated for **2018**.
+All of the above variables were changed to the original format of **2018**, in order to be able to estimate the same model and compare with the one estimated for **2018**.
 
-```{r echo= F, results='asis'}
+```{r echo= F, results='asis', message=FALSE, warning=FALSE}
 survey <- survey %>%
   dplyr::select(CareerSatisfaction, Country, FormalEducation, 
                 CompanySize, YearsCoding, JobSatisfaction, 
                 ConvertedSalary, Hobby, Age)
 ```
 
-```{r echo= F, results='asis'}
+```{r echo= F, results='asis',message=FALSE, warning=F}
 survey1 <- survey1 %>%
   dplyr::select(CareerSat, Country, EdLevel, 
                 OrgSize, YearsCode, JobSat, 
                 ConvertedComp, Hobbyist, Age) # the column names are different from 2018 survey
 ```
 
-```{r echo= F, results='asis'}
+```{r echo= F, results='asis',message=FALSE, warning=F}
 colnames(survey1) <- c('CareerSatisfaction', 'Country', 'FormalEducation', 
                 'CompanySize', 'YearsCoding', 'JobSatisfaction', 
                 'ConvertedSalary', 'Hobby', 'Age') # changed as per the same names of 2018 survey
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey <- survey %>% 
   filter(ConvertedSalary!=0) %>% 
   na.omit(survey)
@@ -163,7 +162,7 @@ survey1 <- survey1 %>%
   na.omit(survey1)
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey <- survey %>%
   filter(
     Country %in% c("Poland", "Czech Republic", "Hungary", "Slovakia", "Romania",
@@ -175,7 +174,7 @@ survey1 <- survey1 %>%
       "Bulgaria", "Turkey", "Moldova", "Belarus", "Ukraine")) 
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$CareerSatisfaction <-
   plyr::revalue(
     survey$CareerSatisfaction,
@@ -201,7 +200,7 @@ survey1$CareerSatisfaction <-
       "Very satisfied" = 3)) %>% as.factor()
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$Country <- survey$Country %>%
   as.factor()
 
@@ -209,7 +208,7 @@ survey1$Country <- survey1$Country %>%
   as.factor()
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$FormalEducation <- plyr::revalue(
   survey$FormalEducation,
   c(
@@ -247,7 +246,7 @@ survey1$FormalEducation <- plyr::revalue(
   as.factor() 
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$CompanySize <- plyr::revalue(
   survey$CompanySize,
   c(
@@ -282,7 +281,7 @@ survey1$CompanySize <- plyr::revalue(
     )) %>% as.factor()
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$YearsCoding <-
   plyr::revalue(
     survey$YearsCoding,
@@ -304,7 +303,7 @@ survey1$YearsCoding[survey1$YearsCoding %in% (6:17)] <- 2
 survey1$YearsCoding[survey1$YearsCoding %in% (18:50)] <- 3 
 ```
 
-```{r echo= F, results='hide'}
+```{r echo= F, results='hide',message=FALSE, warning=F}
 survey$JobSatisfaction <-
   plyr::revalue(
     survey$JobSatisfaction,
@@ -345,7 +344,7 @@ plot(survey$ConvertedSalary, main="ConvertedSalary", xlab= '', ylab= '', col="st
 abline(h=250000, col="red")
 ```
 
-Number of outliers:
+`Number of outliers`:
 
 ```{r echo= F, results='asis'}
 survey %>% 
@@ -379,7 +378,7 @@ survey1 %>%
 
 <br> </br>
 
-Considering only lower salaries than **250,000 $** seem that in **2019 there were 10 outliers more** than in 2018.
+Considering only salaries lower than **$250,000**, it seems that in **2019 there were 10 outliers more** than in 2018.
 
 ```{r echo= F, results='hide'}
 survey <- survey %>% 
@@ -470,7 +469,7 @@ barplot(counts, main= names(survey1[1]), ylab= NULL, col="steelblue")
 
 <br> </br>
 
-As per the plot it seems the data is **similarly distributed in both years**, it is still **really imabalanced**, however, it is remarkable that the **second level (Neither satisfied nor dissatisfied) increased in 2019**. The reason behind could be due to the **number of available options**, which as mentioned before was **reduced from 7 to 5**.
+As per the plot it seems the data is **similarly distributed in both years**, it is still **imabalanced**, however, it is remarkable that the **second level (Neither satisfied nor dissatisfied) increased in 2019**. The reason behind could be due to the **number of available options**, which as mentioned above was **reduced from 7 to 5**.
 
 :::::::::::::: {.columns}
 ::: {.column width="50%"}
@@ -509,7 +508,7 @@ for(i in a) {
 
 <br> </br>
 
-It seems the distribution of the **covariates is similar**, however, it seems that the participants in **2019 have more coding experience** (years.coding). On the other hand, similarly to the target variable, the feature **job.satisfaction** increased the second level, probably due to the same reasons as presented before.
+It seems the distribution of the **covariates is similar**, despite the increased number of participants in 2019 who have **more coding experience** (years.coding). On the other hand, similarly to the target variable, the variable **job.satisfaction** increased the second level, probably due to the same reasons as presented before.
 
 ### 3.4.4) Estimation
 
@@ -547,6 +546,8 @@ The variable **years.coding3** was the least significant in 2018, and in 2019 is
 <br> </br>
 
 `Best model of 2018  applied on 2019`
+
+**Best model formula**: *`career.satisfaction ~ salary + hobby + job.neutral + job.satisfied`*
 
 ```{r echo = F, include=FALSE, message= FALSE}
 
@@ -731,12 +732,23 @@ stargazer(coeftest(ologit1b), type='html')
 
 <br> </br>
 
-It seems the sign of the estimators is the same, even the values did not change a lot, hence, it can be seen that **the conclusions for 2018 can be applied also to 2019**
 
-When **salary** increases 1K USD is appears that people are **more satisfied with career**.
-People **who have coding as a hobby** are **more satisfied with career** comparing with people who do not have coding as a hobby.
+As seen above, the sign of the estimators is the same (even the values did not change a lot) and the significant level is the same in both years, hence, it can be seen that **the conclusions for 2018 can be applied also to 2019**:
 
-# 4) `Packages versions`
+When **salary** increases in 1K USD it affects, on average, positively on **career satisfaction**.
+People **who have coding as a hobby** are, on average, **more satisfied with their career** comparing with people who do not have coding as a hobby.
+
+# 4) `Conclusions` 
+
+In both years the conclusions are the same, which is not a surprise- we are living in a material world, a capitalist world where money is [correlated with happiness](https://www.forbes.com/sites/alexledsom/2021/02/07/new-study-shows-that-more-money-buys-more-happiness/?sh=14f9199e70d5). The model output, higher salaries affect career satisfaction in a positive way, is inline with the western world conception. 
+Having said that, another factor which positively affects your occupation happiness is your hobby. More precisely, a hobby which is the same as your job. The model shows that programmers who program as a hobby are incline to enjoy more in their job as programmers. Which, again, is not a surprise. As the saying goes "*Do what you love, and you’ll never work another day in your life.*". \
+The bottom line is: find a job you would enjoy doing even in your spare time. Just make sure it is a high pay job. 
+
+
+
+
+
+# 5) `Packages versions`
 
 ```{r echo = F, message= FALSE, warning=FALSE, results='asis'}
 installed.packages()[names(sessionInfo()$otherPkgs), "Version"] %>% 
