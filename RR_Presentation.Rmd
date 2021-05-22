@@ -37,7 +37,7 @@ source("ome.R") # fuctioon provided by the teacher
 
 # 1) `Project description`
 
-The main purpose of the project is to **reproduce an econometric analysis**: "Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe”, that was created by one of us during **Advance Econometrics classes** one year ago.
+The main purpose of the project is to **reproduce an econometric analysis**: "Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe”, that was created by one of us during **Advance Econometrics classes** exactly one year ago.
 
 + Moreover, we are interested in **analyzing the following**:
 
