@@ -1569,38 +1569,37 @@ div.tocify {
 </div>
 
 
-<pre><code>## Warning: package &#39;jtools&#39; was built under R version 4.0.5</code></pre>
 <div id="project-description" class="section level1">
 <h1>1) <code>Project description</code></h1>
-<p>The main purpose of the project is to <strong>reproduce an econometric analysis</strong>: “Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe”, that was created by one of us during <strong>Advance Econometrics classes</strong> one year ago.</p>
+<p>The main purpose of the project is to <strong>reproduce an econometric analysis</strong>: “<em>Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe</em>”, that was created by one of us during <strong>Advance Econometrics classes</strong> exactly one year ago.</p>
 <ul>
-<li><p>Moreover, we are interested in <strong>analyzing the following</strong>:</p>
+<li><p>Specifically, we focused on analyzing the following:</p>
 <ul>
-<li>Find <strong>differences in the results</strong> due to updates of R, used packages, different computers (the original project was run on a computer that is not anymore in use), or any other reason.</li>
-<li>Find ways to <strong>improve the model</strong>, <strong>code</strong>, <strong>repository</strong> or <strong>rmarkdown presentation</strong>.</li>
-<li>Find <strong>differences in the model when applied to a new data</strong> (2019 intead of 2018).</li>
+<li>Whether there are differences in results when <strong>new up-to-date dataset</strong> is applied on the model. As mentioned, the original project was created in Spring 2020. The available data at that time was of the year 2018. Nowadays, a more up-to-date data is available, of the year 2019. We would like to check how the new data affects (or doesn’t affect) the outcome and results, compared to the original work.</li>
+<li>Whether there are differences in results due to <strong>R versions</strong>, <strong>packages updates</strong> and <strong>different computers</strong>. In the past year new versions of R appeared as well as new versions of the R packages (which were used in the original project). We shall check how new versions affect the results, moreover how different machines affect them, as Jorge got a new Mac, and Noam didn’t take part in the original project.</li>
+<li>Find ways to <strong>improve the model</strong>, <strong>code</strong>, <strong>repository</strong> as well as <strong>Rmarkdown presentation</strong>.</li>
 </ul></li>
 </ul>
 </div>
 <div id="general-overview" class="section level1">
 <h1>2) <code>General overview</code></h1>
-<p>The <strong>econometric model</strong> main purpose was to create an <strong>ordered choice logit model</strong> to estimate for <strong>career satisfaction of programmers in Eastern European countries</strong>.</p>
-<p>The data is based on the <strong>online survey results</strong> collected by <strong>StackOverlFlow.com</strong> in <strong>2018</strong>, and it is important to remark that the survey is <strong>launched one time per year</strong>.</p>
+<p>The econometric project goal was to estimate career satisfaction of programmers in Eastern European countries. It was achieved with an <strong>ordered choice logit model</strong> where the <strong>career satisfaction</strong> (leveled from lowest, 1, to highest, 3) as the dependent variable, and different variables such as <strong>salary</strong>, <strong>company size</strong>, <strong>hobby</strong> , <strong>age</strong> and more as independent variables.</p>
+<p>The data is taken from the famous public platform <strong>StackOverlFlow.com</strong>. The site initiated an <a href="https://insights.stackoverflow.com/survey">online survey results</a> in <strong>2018</strong>. What’s more important is to remark that the survey is <strong>launched once per year</strong>, which allows us to follow up the results which were concluded last year, and see how they vary with the new data.</p>
 <ul>
-<li>It will be verified the following <strong>hypothesis</strong>:</li>
+<li>In the paper we shall verify the following hypothesis:</li>
 </ul>
-<p><strong>Hypothesis 1:</strong> Higher salary increases career satisfaction</p>
-<p><strong>Hypothesis 2:</strong> Having hobby increases career satisfaction</p>
+<p><strong>Hypothesis 1:</strong> Is higher salary increases career satisfaction?</p>
+<p><strong>Hypothesis 2:</strong> Is having hobby increases career satisfaction?</p>
 </div>
 <div id="main-changes" class="section level1">
 <h1>3) <code>Main changes</code></h1>
 <div id="differences-in-the-results" class="section level2">
 <h2>3.1) Differences in the results</h2>
-<p>The original model was run in the old computer of one of the participants (mac). However, after running the model one year later in two different computers (mac and windows), the same results were obtaioned (same p-values and in general all the estatistics).</p>
+<p>The original project was done on the old Mac computer of one of the students. Despite that fact, after running the models one year later in two different computers, new Mac and PC, the same results and model outputs were obtained.</p>
 </div>
 <div id="github-repository" class="section level2">
 <h2>3.2) GitHub repository</h2>
-<p>A <strong>GitHub repository was created one year ago</strong> by one of us, hence, it was decided to just <strong>add a contributor</strong> to the project instead of creating a new repository or just forking the project.</p>
+<p>A <a href="https://github.com/lajobu/Ordered_choice_logit_model">GitHub repository</a> was created one year ago, therefore, it was decided to just <strong>add a contributor</strong> to the project instead of creating a new repository or just forking the project.</p>
 <p>This allows to <strong>avoid the need of having pull request</strong>, due to the fact both contributor are allow to push changes to the production branch (master).</p>
 <ul>
 <li><p>Link to the project repository:</p>

@@ -14,7 +14,7 @@ output:
     toc: yes
 ---
 
-```{r echo = F, results = 'hide', message= FALSE}
+```{r echo = F, results = 'hide',warning=F, message= FALSE}
 library(dplyr)
 library(knitr)
 library(psych)
@@ -37,45 +37,47 @@ source("ome.R") # fuctioon provided by the teacher
 
 # 1) `Project description`
 
-The main purpose of the project is to **reproduce an econometric analysis**: "Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe”, that was created by one of us during **Advance Econometrics classes** exactly one year ago.
+The main purpose of the project is to **reproduce an econometric analysis**: "*Ordered Choice Logit Model for Career Satisfaction of Programmers in Eastern Europe*”, that was created by one of us during **Advance Econometrics classes** exactly one year ago.
 
-+ Moreover, we are interested in **analyzing the following**:
++ Specifically, we focused on analyzing the following:
 
-  - Find **differences in the results** due to updates of R, used packages, different computers (the original project was run on a computer that is not anymore in use), or any other reason.
-  - Find ways to **improve the model**, **code**, **repository** or **rmarkdown presentation**.
-  - Find **differences in the model when applied to a new data** (2019 intead of 2018).
+  - Whether there are differences in results when **new up-to-date dataset** is applied on the model. As mentioned, the original project was created in Spring 2020. The available data at that time was of the year 2018. Nowadays, a more up-to-date data is available, of the year 2019. We would like to check how the new data affects (or doesn't affect) the outcome and results, compared to the original work. 
+  - Whether there are differences in results due to **R versions**, **packages updates** and **different computers**. In the past year new versions of R appeared as well as new versions of the R packages (which were used in the original project). We shall check how new versions affect the results, moreover how different machines affect them, as Jorge got a new Mac, and Noam didn't take part in the original project. 
+  - Find ways to **improve the model**, **code**, **repository** as well as **Rmarkdown presentation**.
 
 # 2) `General overview`
 
-The **econometric model** main purpose was to create an **ordered choice logit model** to estimate for **career satisfaction of programmers in Eastern European countries**. 
+The econometric project goal was to estimate career satisfaction of programmers in Eastern European countries. It was achieved with an **ordered choice logit model** where the **career satisfaction** (leveled from lowest, 1, to highest, 3) as the dependent variable, and different variables such as **salary**, **company size**, **hobby** , **age** and more as independent variables.
 
-The data is based on the **online survey results** collected by  **StackOverlFlow.com** in **2018**, and it is important to remark that the survey is **launched one time per year**.
+The data is taken from the famous public platform  **StackOverlFlow.com**. The site initiated an [online survey results](https://insights.stackoverflow.com/survey) in **2018**. What's more important is to remark that the survey is **launched once per year**, which allows us to follow up the results which were concluded last year, and see how they vary with the new data.
 
-+  It will be verified the following **hypothesis**:
+ 
++  In the paper we shall verify the following hypothesis:
 
-  **Hypothesis 1:** Higher salary increases career satisfaction
+  **Hypothesis 1:** Is higher salary increases career satisfaction?
 
-  **Hypothesis 2:** Having hobby increases career satisfaction
+  **Hypothesis 2:** Is having hobby increases career satisfaction?
+
 
 # 3) `Main changes`
 
 ## 3.1) Differences in the results
 
-The original model was run in the old computer of one of the participants (mac). However, after running the model one year later in two different computers (mac and windows), the same results were obtaioned (same p-values and in general all the estatistics).
+The original project was done on the old Mac computer of one of the students. Despite that fact, after running the models one year later in two different computers, new Mac and PC, the same results and model outputs were obtained.
 
 ## 3.2) GitHub repository
 
-A **GitHub repository was created one year ago** by one of us, hence, it was decided to just **add a contributor** to the project instead of creating a new repository or just forking the project. 
+A [GitHub repository](https://github.com/lajobu/Ordered_choice_logit_model) was created a year ago, therefore, it was decided to **add a contributor** to the project instead of creating a new repository or just forking the project. 
 
-This allows to **avoid the need of having pull request**, due to the fact both contributor are allow to push changes to the production branch (master).
+Adding a contributor allows to **avoid the need of having pull requests**, Moreover both contributors are allowed to push changes to the production branch (master).
 
-+ Link to the project repository:
++ The project repository:
 
   - https://github.com/lajobu/Ordered_choice_logit_model
 
-On the other hand, the **data was not pushed due to the limit of a 100mb** which does not allow to publish larghe files.
+The **dataset was not pushed due to the limit of a 100 megabytes** which does not allow to publish large files.
 
-However, we found out a work around with **Git Large File Storage**, this open source Git extension allow one to publish large files (LFS), however, there is a **limit of 1GB of free storage and 1GB a month of free bandwidth**.
+Trying to combat the files weight limits, we have found out a work around with [Git Large File Storage](https://git-lfs.github.com/). This open source Git extension allows one to publish large files (LFS), with a **limit of 1GB of free storage and 1GB a month of free bandwidth**.
 
 + More information can be found: 
 
